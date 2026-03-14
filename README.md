@@ -32,12 +32,16 @@ The script only downloads from a small allowlist of HTTPS URLs (project-owned so
   - `https://raw.githubusercontent.com/package-url/purl2cpe/main/data/purl2cpe.json`
   - `https://raw.githubusercontent.com/package-url/purl2cpe/main/purl2cpe.csv`
   - `https://raw.githubusercontent.com/package-url/purl2cpe/main/purl2cpe.json`
+  - `https://raw.githubusercontent.com/package-url/purl2cpe/master/data/purl2cpe.csv`
+  - `https://raw.githubusercontent.com/package-url/purl2cpe/master/data/purl2cpe.json`
+  - `https://raw.githubusercontent.com/package-url/purl2cpe/master/purl2cpe.csv`
+  - `https://raw.githubusercontent.com/package-url/purl2cpe/master/purl2cpe.json`
 - inthewilddb (project repo candidates):
   - `https://raw.githubusercontent.com/inthewilddb/IntheWildDB/main/data/inthewilddb.csv`
   - `https://raw.githubusercontent.com/inthewilddb/IntheWildDB/main/inthewilddb.csv`
   - `https://raw.githubusercontent.com/inthewilddb/IntheWildDB/main/data/export/inthewilddb.csv`
 
-If all candidates for a required source fail, the script exits nonzero with a clear error.
+If all candidates for purl2cpe or inthewilddb fail, the script continues with that source marked as unavailable and writes diagnostics/coverage with zero joins for that source. The OSV source remains required.
 
 ## MoreFixes handling
 
@@ -109,7 +113,8 @@ On each run:
 2. Sets up Python 3.11.
 3. Installs dependencies from `requirements.txt`.
 4. Runs `python scripts/download_and_build_benchmark.py --ci-mode`.
-5. Uploads `benchmark.csv`, `source_coverage.csv`, and `join_diagnostics.csv` as artifact `benchmark-artifacts`.
+5. Outputs all generated CSV results directly in the job logs.
+6. Uploads `benchmark.csv`, `source_coverage.csv`, and `join_diagnostics.csv` as artifact `benchmark-artifacts`.
 
 ### Running from GitHub Actions UI
 
