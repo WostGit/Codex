@@ -20,13 +20,19 @@ import pandas as pd
 
 ALLOWED_URLS = {
     "osv": [
+        "https://osv-vulnerabilities.storage.googleapis.com/all.zip",
         "https://osv-vulnerabilities.storage.googleapis.com/OSV-all.zip",
+        "https://github.com/google/osv-vulnerabilities/archive/refs/heads/main.zip",
     ],
     "purl2cpe": [
         "https://raw.githubusercontent.com/package-url/purl2cpe/main/data/purl2cpe.csv",
         "https://raw.githubusercontent.com/package-url/purl2cpe/main/data/purl2cpe.json",
         "https://raw.githubusercontent.com/package-url/purl2cpe/main/purl2cpe.csv",
         "https://raw.githubusercontent.com/package-url/purl2cpe/main/purl2cpe.json",
+        "https://raw.githubusercontent.com/package-url/purl2cpe/master/data/purl2cpe.csv",
+        "https://raw.githubusercontent.com/package-url/purl2cpe/master/data/purl2cpe.json",
+        "https://raw.githubusercontent.com/package-url/purl2cpe/master/purl2cpe.csv",
+        "https://raw.githubusercontent.com/package-url/purl2cpe/master/purl2cpe.json",
     ],
     "inthewilddb": [
         "https://raw.githubusercontent.com/inthewilddb/IntheWildDB/main/data/inthewilddb.csv",
@@ -245,7 +251,7 @@ def main() -> int:
         except Exception as exc:  # noqa: BLE001
             logging.warning("purl2cpe candidate failed: %s", exc)
     if purl2cpe_source is None:
-        raise RuntimeError("Required source purl2cpe could not be downloaded")
+        logging.warning("Proceeding without purl2cpe: no allowed source could be downloaded")
 
     inthewild_source = None
     for candidate in ALLOWED_URLS["inthewilddb"]:
@@ -257,19 +263,26 @@ def main() -> int:
         except Exception as exc:  # noqa: BLE001
             logging.warning("inthewilddb candidate failed: %s", exc)
     if inthewild_source is None:
-        raise RuntimeError("Required source inthewilddb could not be downloaded")
+        logging.warning("Proceeding without inthewilddb: no allowed source could be downloaded")
 
     diagnostics.extend(
         [
             {"metric": "source_osv", "value": osv_source},
-            {"metric": "source_purl2cpe", "value": purl2cpe_source},
-            {"metric": "source_inthewilddb", "value": inthewild_source},
+            {"metric": "source_purl2cpe", "value": purl2cpe_source or "unavailable"},
+            {"metric": "source_inthewilddb", "value": inthewild_source or "unavailable"},
         ]
     )
 
     osv_df = load_osv_table(osv_zip, max_records=args.osv_max_records)
-    purl2cpe_df = normalize_purl2cpe(read_tabular(purl2cpe_file))
-    inthewild_df = normalize_inthewild(read_tabular(inthewild_file))
+    if purl2cpe_source is None:
+        purl2cpe_df = pd.DataFrame(columns=["purl", "cpe"])
+    else:
+        purl2cpe_df = normalize_purl2cpe(read_tabular(purl2cpe_file))
+
+    if inthewild_source is None:
+        inthewild_df = pd.DataFrame(columns=["cve_id", "in_the_wild"])
+    else:
+        inthewild_df = normalize_inthewild(read_tabular(inthewild_file))
 
     morefixes_df = pd.DataFrame(columns=["cve_id", "morefixes_present"])
     morefixes_status = "skipped"

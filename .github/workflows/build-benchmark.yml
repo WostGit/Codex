@@ -26,8 +26,22 @@ jobs:
           pip install -r requirements.txt
 
       - name: Build benchmark
+        id: build_benchmark
         run: |
           python scripts/download_and_build_benchmark.py --ci-mode
+
+      - name: Output benchmark results
+        if: always()
+        run: |
+          echo "Build benchmark step outcome: ${{ steps.build_benchmark.outcome }}"
+          for file in benchmark.csv source_coverage.csv join_diagnostics.csv; do
+            echo "===== ${file} ====="
+            if [ -f "$file" ]; then
+              cat "$file"
+            else
+              echo "(missing)"
+            fi
+          done
 
       - name: Upload benchmark artifacts
         if: always()
