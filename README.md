@@ -24,7 +24,9 @@ The pipeline is designed to run in GitHub Actions (`ubuntu-latest`) and publish 
 The script only downloads from a small allowlist of HTTPS URLs (project-owned sources):
 
 - OSV dump (official):
-  - `https://osv-vulnerabilities.storage.googleapis.com/OSV-all.zip`
+  - `https://osv-vulnerabilities.storage.googleapis.com/all.zip`
+  - `https://osv-vulnerabilities.storage.googleapis.com/OSV-all.zip` (legacy fallback)
+  - `https://github.com/google/osv-vulnerabilities/archive/refs/heads/main.zip` (repository fallback)
 - purl2cpe (project repo candidates):
   - `https://raw.githubusercontent.com/package-url/purl2cpe/main/data/purl2cpe.csv`
   - `https://raw.githubusercontent.com/package-url/purl2cpe/main/data/purl2cpe.json`

@@ -20,7 +20,9 @@ import pandas as pd
 
 ALLOWED_URLS = {
     "osv": [
+        "https://osv-vulnerabilities.storage.googleapis.com/all.zip",
         "https://osv-vulnerabilities.storage.googleapis.com/OSV-all.zip",
+        "https://github.com/google/osv-vulnerabilities/archive/refs/heads/main.zip",
     ],
     "purl2cpe": [
         "https://raw.githubusercontent.com/package-url/purl2cpe/main/data/purl2cpe.csv",
