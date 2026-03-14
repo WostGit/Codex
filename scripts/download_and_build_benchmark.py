@@ -303,12 +303,12 @@ def main() -> int:
 
     benchmark_df["has_osv"] = benchmark_df["osv_id"].notna()
     benchmark_df["has_purl2cpe"] = benchmark_df["cpe"].notna()
-    benchmark_df["has_inthewilddb"] = benchmark_df["in_the_wild"].fillna(False)
-    benchmark_df["has_morefixes"] = benchmark_df["morefixes_present"].fillna(False)
+    benchmark_df["has_inthewilddb"] = benchmark_df["in_the_wild"].eq(True)
+    benchmark_df["has_morefixes"] = benchmark_df["morefixes_present"].eq(True)
 
     for col in ["in_the_wild", "morefixes_present"]:
         if col in benchmark_df.columns:
-            benchmark_df[col] = benchmark_df[col].fillna(False)
+            benchmark_df[col] = benchmark_df[col].eq(True)
 
     benchmark_df = benchmark_df[
         [
@@ -376,14 +376,15 @@ def main() -> int:
         benchmark_df.loc[benchmark_df["purl"].notna() & benchmark_df["cpe"].isna(), "purl"]
         .value_counts()
         .head(10)
-        .reset_index()
+        .rename_axis("purl")
+        .reset_index(name="count")
     )
     if not top_unmatched_purl.empty:
         for _, row in top_unmatched_purl.iterrows():
             diagnostics.append(
                 {
                     "metric": "top_unmatched_purl",
-                    "value": f"{row['index']} ({row['purl']})",
+                    "value": f"{row['purl']} ({row['count']})",
                 }
             )
 
@@ -391,14 +392,15 @@ def main() -> int:
         benchmark_df.loc[benchmark_df["cve_id"].notna() & ~benchmark_df["has_inthewilddb"], "cve_id"]
         .value_counts()
         .head(10)
-        .reset_index()
+        .rename_axis("cve_id")
+        .reset_index(name="count")
     )
     if not top_unmatched_cve.empty:
         for _, row in top_unmatched_cve.iterrows():
             diagnostics.append(
                 {
                     "metric": "top_unmatched_cve_in_inthewilddb",
-                    "value": f"{row['index']} ({row['cve_id']})",
+                    "value": f"{row['cve_id']} ({row['count']})",
                 }
             )
 
